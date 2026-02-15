@@ -1,0 +1,77 @@
+# handover skill
+
+这个 skill 用于生成会话交接文档 `.claude/handover.md`，在上下文压缩或新会话开始时保留关键上下文。
+
+## 目录结构
+
+```
+handover/
+  scripts/
+    archive_handover.sh
+  SKILL.md
+handover.skill
+```
+
+## 功能清单
+
+- 归档已有的 `.claude/handover.md` 并添加时间戳
+- 收集 git 状态、diff 统计和最近提交记录（非 git 仓库也能安全输出）
+- 汇总本次会话完成事项与未完成任务
+- 记录关键决策及其原因
+- 列出变更文件并按 Backend/Frontend/Config/Other 分类
+- 记录遇到的问题、解决方式与经验总结
+- 生成优先级排序的后续步骤
+- 输出带生成时间戳的结构化交接文档
+
+## 输出结构
+
+交接文档写入 `.claude/handover.md`，包含以下部分：
+
+- Session Summary
+- Tasks（Completed / In Progress）
+- Key Decisions
+- Files Changed（Backend / Frontend / Config / Other）
+- Pitfalls & Workarounds
+- Lessons Learned
+- Git Status 与 Diff Stats
+- Next Steps
+
+## 使用方式
+
+- 手动输入 `/handover`
+- 通过 PreCompact hook 自动触发
+
+## Hook 配置
+
+需要配置两个 hook：
+
+1. PreCompact hook
+   - 在上下文压缩前执行 `/handover`，生成最新交接文档。
+
+2. 新会话 hook
+   - 每次新对话开始时检查项目内 `.claude/handover.md`。
+   - 如果存在，优先读取该文件，再进行其他操作。
+
+示例逻辑（按你的 hook 系统调整）：
+
+```
+hooks:
+  PreCompact:
+    - run: "/handover"
+  SessionStart:
+    - if_exists: ".claude/handover.md"
+      read: ".claude/handover.md"
+```
+
+## 开发与打包
+
+打包为可分发的 `.skill` 文件：
+
+```bash
+scripts/package_skill.py /path/to/handover
+```
+
+## 入口说明
+
+- 主要说明与流程：`handover/SKILL.md`
+- 归档脚本：`handover/scripts/archive_handover.sh`
