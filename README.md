@@ -9,7 +9,6 @@ handover/
   scripts/
     archive_handover.sh
   SKILL.md
-handover.skill
 ```
 
 ## Features
